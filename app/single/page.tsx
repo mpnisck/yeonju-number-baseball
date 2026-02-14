@@ -20,7 +20,7 @@ export default function SinglePlayerPage() {
   const [history, setHistory] = useState<GuessResult[]>([]);
   const [isWon, setIsWon] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
-  const [showAnswer, setShowAnswer] = useState(false);
+  // const [showAnswer, setShowAnswer] = useState(false);
 
   const handleSelect = useCallback(
     (digit: number) => {
@@ -60,7 +60,7 @@ export default function SinglePlayerPage() {
     setSelected([]);
     setHistory([]);
     setIsWon(false);
-    setShowAnswer(false);
+    // setShowAnswer(false);
   }, []);
 
   return (
@@ -71,33 +71,7 @@ export default function SinglePlayerPage() {
           title="1인용 모드"
           subtitle="컴퓨터의 숫자를 맞춰보세요"
           onReset={handleReset}
-        />
-
-        {/* Status bar */}
-        <div className="flex items-center justify-center gap-3 flex-wrap">
-          <button
-            onClick={() => setShowAnswer((prev) => !prev)}
-            className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
-          >
-            <span className="text-xs">{showAnswer ? "🔓" : "🔒"}</span>
-            {showAnswer ? (
-              <div className="flex gap-1">
-                {secret.map((digit, i) => (
-                  <span
-                    key={i}
-                    className="w-6 h-6 rounded bg-[var(--strike)]/10 border border-[var(--strike)]/20 flex items-center justify-center text-[11px] font-bold text-[var(--strike)] animate-pop-in"
-                  >
-                    {digit}
-                  </span>
-                ))}
-              </div>
-            ) : (
-              <span className="text-xs font-medium text-[var(--text-muted)]">
-                정답 보기
-              </span>
-            )}
-          </button>
-
+        >
           <div className="flex items-center gap-4 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-card)]">
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] text-[var(--text-muted)]">시도</span>
@@ -122,7 +96,7 @@ export default function SinglePlayerPage() {
               </span>
             </div>
           </div>
-        </div>
+        </GameHeader>
 
         {/* Two-column: Input (left) + History (right) */}
         <div className="mt-6 flex flex-col md:flex-row gap-6 items-start">

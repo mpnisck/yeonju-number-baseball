@@ -7,12 +7,14 @@ interface GameHeaderProps {
   title: string;
   subtitle?: string;
   onReset?: () => void;
+  children?: React.ReactNode;
 }
 
 export default function GameHeader({
   title,
   subtitle,
   onReset,
+  children,
 }: GameHeaderProps) {
   return (
     <header className="flex items-center justify-between w-full mb-6">
@@ -34,15 +36,18 @@ export default function GameHeader({
           )}
         </div>
       </div>
-      {onReset && (
-        <button
-          onClick={onReset}
-          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[var(--bg-input)] hover:bg-[var(--bg-hover)] text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-        >
-          <IconRefresh size={14} />
-          <span>다시하기</span>
-        </button>
-      )}
+      <div className="flex items-center gap-2">
+        {children}
+        {onReset && (
+          <button
+            onClick={onReset}
+            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[var(--bg-input)] hover:bg-[var(--bg-hover)] text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+          >
+            <IconRefresh size={14} />
+            <span>다시하기</span>
+          </button>
+        )}
+      </div>
     </header>
   );
 }
