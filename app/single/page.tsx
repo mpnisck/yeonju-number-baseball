@@ -99,7 +99,7 @@ export default function SinglePlayerPage() {
         </GameHeader>
 
         {/* Two-column: Input (left) + History (right) */}
-        <div className="mt-6 flex flex-col md:flex-row gap-6 items-start">
+        <div className="mt-6 flex flex-col md:flex-row gap-6 md:items-stretch">
           {/* Left: Number Pad */}
           <div className="w-full md:w-[360px] md:shrink-0">
             <div key={`${resetKey}-${shakeKey}`} className={shakeKey > 0 ? "animate-shake" : resetKey > 0 ? "animate-fade-in-scale" : ""}>
@@ -115,9 +115,7 @@ export default function SinglePlayerPage() {
 
           {/* Right: Guess History */}
           <div className="w-full md:flex-1 md:min-w-0">
-            <div className="md:sticky md:top-8">
-              <GuessHistory history={history} />
-            </div>
+            <GuessHistory history={history} />
           </div>
         </div>
       </div>

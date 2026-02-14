@@ -372,7 +372,7 @@ export default function MultiGamePage() {
           )}
 
           {/* Two-column: Input (left) + History (right) */}
-          <div className="mt-6 flex flex-col md:flex-row gap-6 items-start">
+          <div className="mt-6 flex flex-col md:flex-row gap-6 md:items-stretch">
             {/* Left: Number Pad */}
             <div className="w-full md:w-[360px] md:shrink-0">
               <div key={shakeKey} className={shakeKey > 0 ? "animate-shake" : ""}>
@@ -387,16 +387,14 @@ export default function MultiGamePage() {
             </div>
 
             {/* Right: Guess History */}
-            <div className="w-full md:flex-1 md:min-w-0">
-              <div className="md:sticky md:top-8 flex flex-col gap-5">
-                <GuessHistory history={myHistory} label="내 기록" />
-                {opponentHistory.length > 0 && (
-                  <GuessHistory
-                    history={opponentHistory}
-                    label={`Player ${opponentNum} 기록`}
-                  />
-                )}
-              </div>
+            <div className="w-full md:flex-1 md:min-w-0 flex flex-col gap-5">
+              <GuessHistory history={myHistory} label="내 기록" />
+              {opponentHistory.length > 0 && (
+                <GuessHistory
+                  history={opponentHistory}
+                  label={`Player ${opponentNum} 기록`}
+                />
+              )}
             </div>
           </div>
         </div>
