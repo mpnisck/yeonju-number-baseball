@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { IconTrophy, IconHome, IconRefresh } from "@/app/components/Icons";
 
 interface VictoryOverlayProps {
@@ -32,9 +32,7 @@ export default function VictoryOverlay({
   onHome,
 }: VictoryOverlayProps) {
   const isMulti = !!(mySecret || opponentSecret);
-  const [confetti, setConfetti] = useState<Confetti[]>([]);
-
-  useEffect(() => {
+  const [confetti] = useState<Confetti[]>(() => {
     const colors = [
       "#eab308",
       "#facc15",
@@ -43,7 +41,7 @@ export default function VictoryOverlay({
       "#22c55e",
       "#4ade80",
     ];
-    const pieces: Confetti[] = Array.from({ length: 40 }, (_, i) => ({
+    return Array.from({ length: 40 }, (_, i) => ({
       id: i,
       left: Math.random() * 100,
       delay: Math.random() * 2,
@@ -51,8 +49,7 @@ export default function VictoryOverlay({
       color: colors[Math.floor(Math.random() * colors.length)],
       size: 4 + Math.random() * 6,
     }));
-    setConfetti(pieces);
-  }, []);
+  });
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
