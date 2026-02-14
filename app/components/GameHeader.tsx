@@ -36,18 +36,20 @@ export default function GameHeader({
           )}
         </div>
       </div>
-      <div className="flex items-center gap-2">
-        {children}
-        {onReset && (
-          <button
-            onClick={onReset}
-            className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[var(--bg-input)] hover:bg-[var(--bg-hover)] text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
-          >
-            <IconRefresh size={14} />
-            <span>다시하기</span>
-          </button>
-        )}
-      </div>
+      {(children || onReset) && (
+        <div className="flex items-center justify-between gap-3 w-full">
+          {children}
+          {onReset && (
+            <button
+              onClick={onReset}
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[var(--bg-input)] hover:bg-[var(--bg-hover)] active:scale-95 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-all cursor-pointer ml-auto"
+            >
+              <IconRefresh size={14} />
+              <span>다시하기</span>
+            </button>
+          )}
+        </div>
+      )}
     </header>
   );
 }

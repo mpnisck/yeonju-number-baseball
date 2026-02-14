@@ -20,7 +20,7 @@ export default function SinglePlayerPage() {
   const [history, setHistory] = useState<GuessResult[]>([]);
   const [isWon, setIsWon] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
-  // const [showAnswer, setShowAnswer] = useState(false);
+  const [resetKey, setResetKey] = useState(0);
 
   const handleSelect = useCallback(
     (digit: number) => {
@@ -60,7 +60,7 @@ export default function SinglePlayerPage() {
     setSelected([]);
     setHistory([]);
     setIsWon(false);
-    // setShowAnswer(false);
+    setResetKey((k) => k + 1);
   }, []);
 
   return (
@@ -102,7 +102,7 @@ export default function SinglePlayerPage() {
         <div className="mt-6 flex flex-col md:flex-row gap-6 items-start">
           {/* Left: Number Pad */}
           <div className="w-full md:w-[360px] md:shrink-0">
-            <div key={shakeKey} className={shakeKey > 0 ? "animate-shake" : ""}>
+            <div key={`${resetKey}-${shakeKey}`} className={shakeKey > 0 ? "animate-shake" : resetKey > 0 ? "animate-fade-in-scale" : ""}>
               <NumberPad
                 selected={selected}
                 onSelect={handleSelect}
