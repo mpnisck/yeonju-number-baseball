@@ -17,7 +17,7 @@ export default function GameHeader({
   children,
 }: GameHeaderProps) {
   return (
-    <header className="flex items-center justify-between w-full mb-6">
+    <header className="flex flex-wrap items-center justify-between gap-3 w-full mb-6">
       <div className="flex items-center gap-4">
         <Link
           href="/"
