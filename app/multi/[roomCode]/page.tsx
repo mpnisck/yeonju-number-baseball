@@ -28,6 +28,8 @@ export default function MultiGamePage() {
     myReady,
     opponentReady,
     isWinner,
+    mySecret,
+    opponentSecret,
   } = useMultiplayerGame(roomCode);
 
   const [selected, setSelected] = useState<number[]>([]);
@@ -258,16 +260,19 @@ export default function MultiGamePage() {
 
   // Phase: playing / finished
   if (room.status === "playing" || room.status === "finished") {
+    const isFinished = room.status === "finished";
+
     return (
       <main className="min-h-dvh flex flex-col items-center px-4 py-8 sm:px-6 sm:py-12">
-        <div className="w-full max-w-md flex flex-col gap-6 animate-fade-in">
+        <div className="w-full max-w-3xl animate-fade-in">
           <GameHeader
             title="온라인 대전"
             subtitle={`방 코드: ${roomCode}`}
           />
 
-          {/* Turn indicator */}
-          <div className="flex items-center justify-center">
+          {/* Status bar */}
+          <div className="flex items-center justify-center gap-3 flex-wrap">
+            {/* Turn indicator */}
             <div className="flex items-center rounded-full border border-[var(--border)] overflow-hidden">
               <div
                 className={`flex items-center gap-2 px-5 py-3 transition-all duration-300 ${
@@ -303,54 +308,101 @@ export default function MultiGamePage() {
                 </span>
               </div>
             </div>
+
+            {/* Current turn banner */}
+            <div
+              className={`flex items-center gap-2.5 px-4 py-2.5 rounded-xl border transition-all duration-300 ${
+                isFinished
+                  ? "border-[var(--success)]/20 bg-[var(--success)]/8 text-[var(--success)]"
+                  : isMyTurn
+                    ? "bg-[var(--strike)]/8 border-[var(--strike)]/20 text-[var(--strike)]"
+                    : "border-[var(--border)] text-[var(--text-muted)]"
+              }`}
+            >
+              {isFinished ? (
+                <span className="font-bold text-sm">게임 종료</span>
+              ) : isMyTurn ? (
+                <>
+                  <PlayerIcon player={playerNumber} size={16} />
+                  <span className="font-bold text-sm">내 차례</span>
+                </>
+              ) : (
+                <>
+                  <PlayerIcon player={opponentNum} size={16} />
+                  <span className="text-sm">상대 차례</span>
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Current turn banner */}
-          <div
-            className={`flex items-center justify-center gap-2.5 py-3.5 rounded-xl border transition-all duration-300 ${
-              isMyTurn
-                ? "bg-[var(--strike)]/8 border-[var(--strike)]/20 text-[var(--strike)]"
-                : "border-[var(--border)] text-[var(--text-muted)]"
-            }`}
-          >
-            {isMyTurn ? (
-              <>
-                <PlayerIcon player={playerNumber} size={16} />
-                <span className="font-bold text-sm">내 차례입니다</span>
-              </>
-            ) : (
-              <>
-                <PlayerIcon player={opponentNum} size={16} />
-                <span className="text-sm">상대방이 추측 중...</span>
-              </>
-            )}
-          </div>
-
-          {/* Number Pad */}
-          <div key={shakeKey} className={shakeKey > 0 ? "animate-shake" : ""}>
-            <NumberPad
-              selected={selected}
-              onSelect={handleSelect}
-              onDelete={handleDelete}
-              onSubmit={handleGuessSubmit}
-              disabled={!isMyTurn || room.status === "finished" || submitting}
-            />
-          </div>
-
-          {/* My History */}
-          <GuessHistory history={myHistory} label="내 기록" />
-
-          {/* Opponent History */}
-          {opponentHistory.length > 0 && (
-            <GuessHistory
-              history={opponentHistory}
-              label={`Player ${opponentNum} 기록`}
-            />
+          {/* 게임 종료 시 양쪽 비밀 숫자 공개 */}
+          {isFinished && (mySecret || opponentSecret) && (
+            <div className="mt-5 flex items-center justify-center gap-4 flex-wrap">
+              {mySecret && (
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-card)]">
+                  <span className="text-xs font-medium text-[var(--text-muted)]">내 숫자</span>
+                  <div className="flex gap-1">
+                    {mySecret.map((digit, i) => (
+                      <span
+                        key={i}
+                        className="w-6 h-6 rounded bg-[var(--accent-secondary)]/10 border border-[var(--accent-secondary)]/20 flex items-center justify-center text-[11px] font-bold text-[var(--accent-secondary)]"
+                      >
+                        {digit}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {opponentSecret && (
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-card)]">
+                  <span className="text-xs font-medium text-[var(--text-muted)]">상대 숫자</span>
+                  <div className="flex gap-1">
+                    {opponentSecret.map((digit, i) => (
+                      <span
+                        key={i}
+                        className="w-6 h-6 rounded bg-[var(--strike)]/10 border border-[var(--strike)]/20 flex items-center justify-center text-[11px] font-bold text-[var(--strike)]"
+                      >
+                        {digit}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           )}
+
+          {/* Two-column: Input (left) + History (right) */}
+          <div className="mt-6 flex flex-col md:flex-row gap-6 items-start">
+            {/* Left: Number Pad */}
+            <div className="w-full md:w-[360px] md:shrink-0">
+              <div key={shakeKey} className={shakeKey > 0 ? "animate-shake" : ""}>
+                <NumberPad
+                  selected={selected}
+                  onSelect={handleSelect}
+                  onDelete={handleDelete}
+                  onSubmit={handleGuessSubmit}
+                  disabled={!isMyTurn || isFinished || submitting}
+                />
+              </div>
+            </div>
+
+            {/* Right: Guess History */}
+            <div className="w-full md:flex-1 md:min-w-0">
+              <div className="md:sticky md:top-8 flex flex-col gap-5">
+                <GuessHistory history={myHistory} label="내 기록" />
+                {opponentHistory.length > 0 && (
+                  <GuessHistory
+                    history={opponentHistory}
+                    label={`Player ${opponentNum} 기록`}
+                  />
+                )}
+              </div>
+            </div>
+          </div>
         </div>
 
         {/* Victory */}
-        {room.status === "finished" && room.winner && (
+        {isFinished && room.winner && (
           <VictoryOverlay
             winner={
               room.winner === playerNumber
@@ -363,6 +415,8 @@ export default function MultiGamePage() {
                 : room.player2_history.length
             }
             answer={room.revealed_answer || []}
+            mySecret={mySecret}
+            opponentSecret={opponentSecret}
             onPlayAgain={() => router.push("/multi")}
             onHome={() => router.push("/")}
           />

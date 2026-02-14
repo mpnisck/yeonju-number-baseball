@@ -50,8 +50,28 @@ export async function GET(
 
   const { player1_token, player2_token, ...safeRoom } = room;
 
+  // 게임 종료 시 양쪽 비밀 숫자 반환
+  let player1_secret: number[] | null = null;
+  let player2_secret: number[] | null = null;
+
+  if (room.status === "finished") {
+    const { data: secrets } = await supabase
+      .from("player_secrets")
+      .select("player_number, secret")
+      .eq("room_id", room.id);
+
+    if (secrets) {
+      for (const s of secrets) {
+        if (s.player_number === 1) player1_secret = s.secret as number[];
+        if (s.player_number === 2) player2_secret = s.secret as number[];
+      }
+    }
+  }
+
   return NextResponse.json({
     ...safeRoom,
     playerNumber,
+    player1_secret,
+    player2_secret,
   });
 }

@@ -7,6 +7,8 @@ interface VictoryOverlayProps {
   winner: string;
   attempts: number;
   answer: number[];
+  mySecret?: number[] | null;
+  opponentSecret?: number[] | null;
   onPlayAgain: () => void;
   onHome: () => void;
 }
@@ -24,9 +26,12 @@ export default function VictoryOverlay({
   winner,
   attempts,
   answer,
+  mySecret,
+  opponentSecret,
   onPlayAgain,
   onHome,
 }: VictoryOverlayProps) {
+  const isMulti = !!(mySecret || opponentSecret);
   const [confetti, setConfetti] = useState<Confetti[]>([]);
 
   useEffect(() => {
@@ -86,17 +91,54 @@ export default function VictoryOverlay({
         </div>
 
         {/* Answer digits */}
-        <div className="flex gap-3">
-          {answer.map((digit, i) => (
-            <span
-              key={i}
-              className="w-14 h-16 rounded-xl bg-[var(--success)]/8 border border-[var(--success)]/15 flex items-center justify-center text-2xl font-bold text-[var(--success)] animate-pop-in opacity-0"
-              style={{ animationDelay: `${i * 0.1 + 0.3}s` }}
-            >
-              {digit}
-            </span>
-          ))}
-        </div>
+        {isMulti ? (
+          <div className="flex flex-col gap-4 w-full">
+            {mySecret && (
+              <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--bg-input)] border border-[var(--border)]">
+                <span className="text-xs font-semibold text-[var(--text-muted)]">내 숫자</span>
+                <div className="flex gap-2">
+                  {mySecret.map((digit, i) => (
+                    <span
+                      key={i}
+                      className="w-9 h-10 rounded-lg bg-[var(--accent-secondary)]/8 border border-[var(--accent-secondary)]/15 flex items-center justify-center text-base font-bold text-[var(--accent-secondary)] animate-pop-in opacity-0"
+                      style={{ animationDelay: `${i * 0.1 + 0.3}s` }}
+                    >
+                      {digit}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+            {opponentSecret && (
+              <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--bg-input)] border border-[var(--border)]">
+                <span className="text-xs font-semibold text-[var(--text-muted)]">상대 숫자</span>
+                <div className="flex gap-2">
+                  {opponentSecret.map((digit, i) => (
+                    <span
+                      key={i}
+                      className="w-9 h-10 rounded-lg bg-[var(--strike)]/8 border border-[var(--strike)]/15 flex items-center justify-center text-base font-bold text-[var(--strike)] animate-pop-in opacity-0"
+                      style={{ animationDelay: `${i * 0.1 + 0.5}s` }}
+                    >
+                      {digit}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="flex gap-3">
+            {answer.map((digit, i) => (
+              <span
+                key={i}
+                className="w-14 h-16 rounded-xl bg-[var(--success)]/8 border border-[var(--success)]/15 flex items-center justify-center text-2xl font-bold text-[var(--success)] animate-pop-in opacity-0"
+                style={{ animationDelay: `${i * 0.1 + 0.3}s` }}
+              >
+                {digit}
+              </span>
+            ))}
+          </div>
+        )}
 
         {/* Actions */}
         <div className="flex gap-3 w-full mt-1">

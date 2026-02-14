@@ -15,6 +15,8 @@ export interface GameRoom {
   player1_history: GuessResult[];
   player2_history: GuessResult[];
   revealed_answer: number[] | null;
+  player1_secret: number[] | null;
+  player2_secret: number[] | null;
 }
 
 interface PlayerInfo {
@@ -129,8 +131,21 @@ export function useMultiplayerGame(roomCode: string) {
           table: "game_rooms",
           filter: `room_code=eq.${roomCode}`,
         },
-        payload => {
+        async (payload) => {
           const newRoom = payload.new as GameRoom;
+
+          // 게임 종료 시 양쪽 비밀 숫자 다시 가져오기
+          if (newRoom.status === "finished" && playerToken) {
+            const res = await fetch(
+              `/api/rooms/${roomCode}?token=${playerToken}`
+            );
+            if (res.ok) {
+              const data = await res.json();
+              setRoom(data);
+              return;
+            }
+          }
+
           setRoom(newRoom);
         }
       )
@@ -141,7 +156,7 @@ export function useMultiplayerGame(roomCode: string) {
     return () => {
       client!.removeChannel(channel);
     };
-  }, [roomCode]);
+  }, [roomCode, playerToken]);
 
   // 비밀 숫자 제출
   const submitSecret = useCallback(
@@ -196,6 +211,10 @@ export function useMultiplayerGame(roomCode: string) {
   const opponentReady =
     playerNumber === 1 ? room?.player2_ready : room?.player1_ready;
   const isWinner = room?.winner === playerNumber;
+  const mySecret =
+    playerNumber === 1 ? room?.player1_secret : room?.player2_secret;
+  const opponentSecret =
+    playerNumber === 1 ? room?.player2_secret : room?.player1_secret;
 
   return {
     room,
@@ -210,5 +229,7 @@ export function useMultiplayerGame(roomCode: string) {
     myReady: myReady || false,
     opponentReady: opponentReady || false,
     isWinner,
+    mySecret: mySecret || null,
+    opponentSecret: opponentSecret || null,
   };
 }
