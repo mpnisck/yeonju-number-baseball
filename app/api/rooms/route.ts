@@ -3,7 +3,15 @@ import { getSupabaseAdmin } from "@/app/lib/supabase-server";
 import { generateRoomCode } from "@/app/lib/room-code";
 
 export async function POST() {
-  const supabase = getSupabaseAdmin();
+  let supabase;
+  try {
+    supabase = getSupabaseAdmin();
+  } catch {
+    return NextResponse.json(
+      { error: "서버 설정 오류가 발생했습니다." },
+      { status: 500 },
+    );
+  }
   const playerToken = crypto.randomUUID();
 
   let roomCode = generateRoomCode();

@@ -15,8 +15,8 @@ export default function GameHeader({
   onReset,
 }: GameHeaderProps) {
   return (
-    <header className="flex items-center justify-between w-full mb-4">
-      <div className="flex items-center gap-3.5">
+    <header className="flex items-center justify-between w-full mb-6">
+      <div className="flex items-center gap-4">
         <Link
           href="/"
           className="w-10 h-10 rounded-xl bg-[var(--bg-input)] hover:bg-[var(--bg-hover)] flex items-center justify-center transition-colors text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
@@ -24,7 +24,7 @@ export default function GameHeader({
           <IconArrowLeft size={18} />
         </Link>
         <div>
-          <h1 className="text-lg font-bold text-[var(--text-primary)] leading-tight">
+          <h1 className="text-xl font-bold text-[var(--text-primary)] leading-tight">
             {title}
           </h1>
           {subtitle && (
@@ -37,7 +37,7 @@ export default function GameHeader({
       {onReset && (
         <button
           onClick={onReset}
-          className="flex items-center gap-1.5 px-3.5 py-2.5 rounded-xl bg-[var(--bg-input)] hover:bg-[var(--bg-hover)] text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
+          className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-[var(--bg-input)] hover:bg-[var(--bg-hover)] text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors cursor-pointer"
         >
           <IconRefresh size={14} />
           <span>다시하기</span>

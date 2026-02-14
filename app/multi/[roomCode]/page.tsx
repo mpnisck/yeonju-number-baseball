@@ -259,8 +259,8 @@ export default function MultiGamePage() {
   // Phase: playing / finished
   if (room.status === "playing" || room.status === "finished") {
     return (
-      <main className="min-h-dvh flex flex-col items-center px-6 py-10 sm:py-16">
-        <div className="w-full max-w-sm flex flex-col gap-6 animate-fade-in">
+      <main className="min-h-dvh flex flex-col items-center px-4 py-8 sm:px-6 sm:py-12">
+        <div className="w-full max-w-md flex flex-col gap-6 animate-fade-in">
           <GameHeader
             title="온라인 대전"
             subtitle={`방 코드: ${roomCode}`}

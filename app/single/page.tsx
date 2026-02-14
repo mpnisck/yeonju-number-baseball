@@ -20,6 +20,7 @@ export default function SinglePlayerPage() {
   const [history, setHistory] = useState<GuessResult[]>([]);
   const [isWon, setIsWon] = useState(false);
   const [shakeKey, setShakeKey] = useState(0);
+  const [showAnswer, setShowAnswer] = useState(false);
 
   const handleSelect = useCallback(
     (digit: number) => {
@@ -59,11 +60,13 @@ export default function SinglePlayerPage() {
     setSelected([]);
     setHistory([]);
     setIsWon(false);
+    setShowAnswer(false);
   }, []);
 
   return (
-    <main className="min-h-dvh flex flex-col items-center px-6 py-16 sm:py-24">
-      <div className="w-full max-w-md flex flex-col items-center gap-8 animate-fade-in">
+    <main className="min-h-dvh flex flex-col items-center px-4 py-8 sm:px-6 sm:py-12">
+      <div className="w-full max-w-3xl animate-fade-in">
+        {/* Header */}
         <GameHeader
           title="1인용 모드"
           subtitle="컴퓨터의 숫자를 맞춰보세요"
@@ -71,39 +74,78 @@ export default function SinglePlayerPage() {
         />
 
         {/* Status bar */}
-        <div className="w-full flex items-center justify-center gap-8 px-6 py-4 rounded-2xl border border-[var(--border)]">
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-xs text-[var(--text-muted)]">시도</span>
-            <span className="text-2xl font-bold text-[var(--text-primary)]">
-              {history.length}
-            </span>
-          </div>
-          <div className="w-px h-10 bg-[var(--border)]" />
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-xs text-[var(--text-muted)]">상태</span>
-            <span className="text-sm font-semibold text-[var(--text-secondary)]">
-              {isWon
-                ? "정답!"
-                : history.length === 0
-                  ? "시작하세요"
-                  : "진행 중"}
-            </span>
+        <div className="flex items-center justify-center gap-3 flex-wrap">
+          <button
+            onClick={() => setShowAnswer((prev) => !prev)}
+            className="flex items-center gap-2.5 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-card)] hover:bg-[var(--bg-hover)] transition-colors cursor-pointer"
+          >
+            <span className="text-xs">{showAnswer ? "🔓" : "🔒"}</span>
+            {showAnswer ? (
+              <div className="flex gap-1">
+                {secret.map((digit, i) => (
+                  <span
+                    key={i}
+                    className="w-6 h-6 rounded bg-[var(--strike)]/10 border border-[var(--strike)]/20 flex items-center justify-center text-[11px] font-bold text-[var(--strike)] animate-pop-in"
+                  >
+                    {digit}
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <span className="text-xs font-medium text-[var(--text-muted)]">
+                정답 보기
+              </span>
+            )}
+          </button>
+
+          <div className="flex items-center gap-4 px-4 py-2.5 rounded-xl border border-[var(--border)] bg-[var(--bg-card)]">
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] text-[var(--text-muted)]">시도</span>
+              <span className="text-sm font-bold text-[var(--text-primary)] tabular-nums">
+                {history.length}
+              </span>
+            </div>
+            <div className="w-px h-4 bg-[var(--border)]" />
+            <div className="flex items-center gap-1.5">
+              <span className="text-[11px] text-[var(--text-muted)]">상태</span>
+              <span
+                className={`text-xs font-semibold ${isWon
+                  ? "text-[var(--success)]"
+                  : "text-[var(--text-secondary)]"
+                  }`}
+              >
+                {isWon
+                  ? "정답!"
+                  : history.length === 0
+                    ? "시작하세요"
+                    : "진행 중"}
+              </span>
+            </div>
           </div>
         </div>
 
-        {/* Number Pad */}
-        <div key={shakeKey} className={shakeKey > 0 ? "animate-shake" : ""}>
-          <NumberPad
-            selected={selected}
-            onSelect={handleSelect}
-            onDelete={handleDelete}
-            onSubmit={handleSubmit}
-            disabled={isWon}
-          />
-        </div>
+        {/* Two-column: Input (left) + History (right) */}
+        <div className="mt-6 flex flex-col md:flex-row gap-6 items-start">
+          {/* Left: Number Pad */}
+          <div className="w-full md:w-[360px] md:shrink-0">
+            <div key={shakeKey} className={shakeKey > 0 ? "animate-shake" : ""}>
+              <NumberPad
+                selected={selected}
+                onSelect={handleSelect}
+                onDelete={handleDelete}
+                onSubmit={handleSubmit}
+                disabled={isWon}
+              />
+            </div>
+          </div>
 
-        {/* History */}
-        <GuessHistory history={history} />
+          {/* Right: Guess History */}
+          <div className="w-full md:flex-1 md:min-w-0">
+            <div className="md:sticky md:top-8">
+              <GuessHistory history={history} />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Victory */}

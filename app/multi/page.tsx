@@ -18,9 +18,9 @@ export default function MultiLobbyPage() {
 
     try {
       const res = await fetch("/api/rooms", { method: "POST" });
-      const data = await res.json();
 
       if (res.ok) {
+        const data = await res.json();
         localStorage.setItem(
           `numbaseball_${data.roomCode}`,
           JSON.stringify({
@@ -30,7 +30,12 @@ export default function MultiLobbyPage() {
         );
         router.push(`/multi/${data.roomCode}`);
       } else {
-        setError(data.error || "방 생성에 실패했습니다.");
+        try {
+          const data = await res.json();
+          setError(data.error || "방 생성에 실패했습니다.");
+        } catch {
+          setError("서버 오류가 발생했습니다.");
+        }
       }
     } catch {
       setError("네트워크 오류가 발생했습니다.");

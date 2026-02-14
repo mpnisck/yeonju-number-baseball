@@ -22,32 +22,35 @@ export default function NumberPad({
   const isFull = selected.length >= maxDigits;
 
   return (
-    <div className="flex flex-col gap-6 w-full">
+    <div className="flex flex-col gap-5 w-full p-5 sm:p-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-card)]">
       {/* Selected digits display */}
-      <div className="flex justify-center gap-4">
+      <div className="flex justify-center gap-3">
         {Array.from({ length: maxDigits }).map((_, i) => {
           const hasValue = selected[i] !== undefined;
           return (
             <div
               key={i}
               className={`
-                w-16 h-[72px] sm:w-[72px] sm:h-20 rounded-2xl flex items-center justify-center
-                text-[26px] sm:text-3xl font-bold transition-all duration-200
+                w-14 h-16 sm:w-16 sm:h-[72px] rounded-xl flex items-center justify-center
+                text-2xl sm:text-[26px] font-bold transition-all duration-200
                 ${
                   hasValue
-                    ? "bg-[var(--strike)]/10 border-2 border-[var(--strike)]/40 text-[var(--strike)] animate-pop-in"
-                    : "bg-[var(--bg-input)] text-[var(--text-muted)] border-2 border-dashed border-[var(--border)]"
+                    ? "bg-[var(--strike)]/10 border-2 border-[var(--strike)]/30 text-[var(--strike)] animate-pop-in shadow-sm"
+                    : "bg-[var(--bg-input)] text-[var(--text-muted)]/40 border-2 border-dashed border-[var(--border)]"
                 }
               `}
             >
-              {hasValue ? selected[i] : <span className="text-base">_</span>}
+              {hasValue ? selected[i] : <span className="text-sm">_</span>}
             </div>
           );
         })}
       </div>
 
+      {/* Divider */}
+      <div className="h-px bg-[var(--border)]" />
+
       {/* Number grid */}
-      <div className="grid grid-cols-5 gap-3">
+      <div className="grid grid-cols-5 gap-2.5">
         {Array.from({ length: 10 }).map((_, digit) => {
           const isSelected = selected.includes(digit);
           return (
@@ -56,14 +59,14 @@ export default function NumberPad({
               onClick={() => onSelect(digit)}
               disabled={disabled || isSelected || isFull}
               className={`
-                h-14 sm:h-[60px] rounded-2xl text-lg sm:text-xl font-semibold
+                h-12 sm:h-13 rounded-xl text-base sm:text-lg font-semibold
                 transition-all duration-150 active:scale-90
                 ${
                   isSelected
-                    ? "bg-[var(--strike)]/8 text-[var(--strike)]/50 border border-[var(--strike)]/15"
+                    ? "bg-[var(--strike)]/8 text-[var(--strike)]/40 border border-[var(--strike)]/10"
                     : disabled || isFull
                       ? "bg-[var(--bg-input)]/60 text-[var(--text-muted)] cursor-not-allowed"
-                      : "bg-[var(--bg-input)] text-[var(--text-primary)] hover:bg-[var(--bg-hover)] border border-[var(--border)] cursor-pointer"
+                      : "bg-[var(--bg-input)] text-[var(--text-primary)] hover:bg-[var(--bg-hover)] border border-[var(--border)] cursor-pointer hover:shadow-sm"
                 }
               `}
             >
@@ -74,12 +77,12 @@ export default function NumberPad({
       </div>
 
       {/* Action buttons */}
-      <div className="flex gap-3 mt-2">
+      <div className="flex gap-2.5 pt-1">
         <button
           onClick={onDelete}
           disabled={disabled || selected.length === 0}
           className={`
-            flex-1 h-14 sm:h-[60px] rounded-2xl text-sm font-semibold
+            flex-1 h-12 sm:h-13 rounded-xl text-sm font-semibold
             transition-all duration-150 active:scale-95
             flex items-center justify-center gap-2
             ${
@@ -89,24 +92,24 @@ export default function NumberPad({
             }
           `}
         >
-          <IconDelete size={16} />
+          <IconDelete size={15} />
           <span>지우기</span>
         </button>
         <button
           onClick={onSubmit}
           disabled={disabled || !isFull}
           className={`
-            flex-[2] h-14 sm:h-[60px] rounded-2xl text-sm font-bold
+            flex-[2] h-12 sm:h-13 rounded-xl text-sm font-bold
             transition-all duration-150 active:scale-95
             flex items-center justify-center gap-2
             ${
               disabled || !isFull
                 ? "bg-[var(--bg-input)]/60 text-[var(--text-muted)] cursor-not-allowed"
-                : "bg-[var(--text-primary)] text-white hover:opacity-90 cursor-pointer"
+                : "bg-[var(--text-primary)] text-white hover:opacity-90 cursor-pointer shadow-sm"
             }
           `}
         >
-          <IconSend size={16} />
+          <IconSend size={15} />
           <span>확인</span>
         </button>
       </div>

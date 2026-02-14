@@ -43,7 +43,9 @@ export function useMultiplayerGame(roomCode: string) {
   const [playerToken, setPlayerToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const channelRef = useRef<ReturnType<ReturnType<typeof getSupabase>["channel"]> | null>(null);
+  const channelRef = useRef<ReturnType<
+    ReturnType<typeof getSupabase>["channel"]
+  > | null>(null);
 
   // 초기 로드: 토큰 확인 + 방 상태 가져오기
   useEffect(() => {
@@ -55,9 +57,7 @@ export function useMultiplayerGame(roomCode: string) {
         setPlayerToken(stored.token);
         setPlayerNumber(stored.playerNumber);
 
-        const res = await fetch(
-          `/api/rooms/${roomCode}?token=${stored.token}`,
-        );
+        const res = await fetch(`/api/rooms/${roomCode}?token=${stored.token}`);
         if (res.ok) {
           const data = await res.json();
           setRoom(data);
@@ -90,14 +90,18 @@ export function useMultiplayerGame(roomCode: string) {
 
         // 방 상태 다시 가져오기
         const roomRes = await fetch(
-          `/api/rooms/${roomCode}?token=${data.playerToken}`,
+          `/api/rooms/${roomCode}?token=${data.playerToken}`
         );
         if (roomRes.ok) {
           setRoom(await roomRes.json());
         }
       } else {
-        const errData = await res.json();
-        setError(errData.error || "방 참가에 실패했습니다.");
+        try {
+          const errData = await res.json();
+          setError(errData.error || "방 참가에 실패했습니다.");
+        } catch {
+          setError("서버 오류가 발생했습니다.");
+        }
       }
     };
 
@@ -106,7 +110,15 @@ export function useMultiplayerGame(roomCode: string) {
 
   // Realtime 구독
   useEffect(() => {
-    const client = getSupabase();
+    let client: ReturnType<typeof getSupabase> | null = null;
+    try {
+      client = getSupabase();
+    } catch {
+      setError("서버 설정 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      setIsLoading(false);
+      return;
+    }
+
     const channel = client
       .channel(`room-${roomCode}`)
       .on(
@@ -117,17 +129,17 @@ export function useMultiplayerGame(roomCode: string) {
           table: "game_rooms",
           filter: `room_code=eq.${roomCode}`,
         },
-        (payload) => {
+        payload => {
           const newRoom = payload.new as GameRoom;
           setRoom(newRoom);
-        },
+        }
       )
       .subscribe();
 
     channelRef.current = channel;
 
     return () => {
-      client.removeChannel(channel);
+      client!.removeChannel(channel);
     };
   }, [roomCode]);
 
@@ -149,7 +161,7 @@ export function useMultiplayerGame(roomCode: string) {
         return { success: false, error: data.error };
       }
     },
-    [playerToken, roomCode],
+    [playerToken, roomCode]
   );
 
   // 추측 제출
@@ -170,7 +182,7 @@ export function useMultiplayerGame(roomCode: string) {
         return { success: false, error: data.error };
       }
     },
-    [playerToken, roomCode],
+    [playerToken, roomCode]
   );
 
   // 파생 상태

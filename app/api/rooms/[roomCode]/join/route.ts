@@ -5,7 +5,15 @@ export async function POST(
   _request: NextRequest,
   { params }: { params: Promise<{ roomCode: string }> },
 ) {
-  const supabase = getSupabaseAdmin();
+  let supabase;
+  try {
+    supabase = getSupabaseAdmin();
+  } catch {
+    return NextResponse.json(
+      { error: "서버 설정 오류가 발생했습니다." },
+      { status: 500 },
+    );
+  }
   const { roomCode } = await params;
 
   const { data: room, error: fetchError } = await supabase
