@@ -7,8 +7,10 @@ import NumberPad from "@/app/components/NumberPad";
 import GuessHistory from "@/app/components/GuessHistory";
 import VictoryOverlay from "@/app/components/VictoryOverlay";
 import WaitingOpponent from "@/app/components/WaitingOpponent";
+import TurnNotificationBanner from "@/app/components/TurnNotificationBanner";
 import { PlayerIcon, IconShield, IconWifi } from "@/app/components/Icons";
 import { useMultiplayerGame } from "@/app/hooks/useMultiplayerGame";
+import { useTurnNotification } from "@/app/hooks/useTurnNotification";
 import { isValidGuess } from "@/app/lib/game";
 
 export default function MultiGamePage() {
@@ -36,6 +38,12 @@ export default function MultiGamePage() {
   const [shakeKey, setShakeKey] = useState(0);
   const [submitting, setSubmitting] = useState(false);
 
+  // 내 차례 알림 (사운드 + 브라우저 알림 + 탭 타이틀 깜빡임)
+  const { requestNotificationPermission } = useTurnNotification({
+    isMyTurn,
+    isPlaying: room?.status === "playing",
+  });
+
   const handleSelect = useCallback(
     (digit: number) => {
       if (selected.length >= 4 || selected.includes(digit)) return;
@@ -53,6 +61,8 @@ export default function MultiGamePage() {
       setShakeKey((k) => k + 1);
       return;
     }
+    // 사용자 클릭 시점에 알림 권한 요청 (MDN 권장 패턴)
+    requestNotificationPermission();
     setSubmitting(true);
     const result = await submitSecret(selected);
     if (result.success) {
@@ -61,7 +71,7 @@ export default function MultiGamePage() {
       setShakeKey((k) => k + 1);
     }
     setSubmitting(false);
-  }, [selected, submitSecret]);
+  }, [selected, submitSecret, requestNotificationPermission]);
 
   const handleGuessSubmit = useCallback(async () => {
     if (!isValidGuess(selected)) {
@@ -264,6 +274,9 @@ export default function MultiGamePage() {
 
     return (
       <main className="min-h-dvh flex flex-col items-center px-4 py-8 sm:px-6 sm:py-12">
+        {/* 내 차례 토스트 알림 */}
+        <TurnNotificationBanner isMyTurn={isMyTurn} isPlaying={!isFinished} />
+
         <div className="w-full max-w-3xl animate-fade-in">
           <GameHeader
             title="온라인 대전"

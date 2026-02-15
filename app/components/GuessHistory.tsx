@@ -57,22 +57,20 @@ export default function GuessHistory({
                 className={`
                   flex items-center justify-between px-5 py-3.5 transition-colors
                   ${isLatest ? "animate-slide-up" : ""}
-                  ${
-                    isAllStrike
-                      ? "bg-[var(--success)]/6"
-                      : isLatest
-                        ? "bg-[var(--strike)]/[0.03]"
-                        : "hover:bg-[var(--bg-secondary)]/50"
+                  ${isAllStrike
+                    ? "bg-[var(--success)]/6"
+                    : isLatest
+                      ? "bg-[var(--strike)]/[0.03]"
+                      : "hover:bg-[var(--bg-secondary)]/50"
                   }
                 `}
               >
                 <div className="flex items-center gap-3.5">
                   <span
-                    className={`text-[11px] font-bold w-7 h-7 rounded-full flex items-center justify-center tabular-nums ${
-                      isAllStrike
+                    className={`text-[11px] font-bold w-7 h-7 rounded-full flex items-center justify-center tabular-nums ${isAllStrike
                         ? "bg-[var(--success)]/15 text-[var(--success)]"
                         : "bg-[var(--bg-input)] text-[var(--text-muted)]"
-                    }`}
+                      }`}
                   >
                     {originalIndex + 1}
                   </span>
@@ -80,11 +78,10 @@ export default function GuessHistory({
                     {item.guess.map((digit, di) => (
                       <span
                         key={di}
-                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${
-                          isAllStrike
+                        className={`w-8 h-8 rounded-lg flex items-center justify-center text-sm font-bold ${isAllStrike
                             ? "bg-[var(--success)]/10 text-[var(--success)]"
                             : "bg-[var(--bg-input)] text-[var(--text-primary)]"
-                        }`}
+                          }`}
                       >
                         {digit}
                       </span>
