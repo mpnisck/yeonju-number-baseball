@@ -4,6 +4,8 @@
 
 > **[DEMO LINK](https://yeonju-number-baseball.vercel.app)**
 
+<img src="public/number-baseball.png" alt="숫자야구 썸네일" width="300" />
+
 <br/>
 
 ## 프로젝트 소개
