@@ -20,7 +20,6 @@ function getAudioContext(): AudioContext | null {
     }
   }
 
-  // suspended 상태이면 resume 시도
   if (audioCtx.state === "suspended") {
     audioCtx.resume();
   }
@@ -37,9 +36,7 @@ export function playTurnSound() {
 
   const now = ctx.currentTime;
 
-  // 첫 번째 음 (C5 - 523Hz)
   playTone(ctx, 523.25, now, 0.15, 0.3);
-  // 두 번째 음 (E5 - 659Hz) — 약간 높은 음으로 상승감
   playTone(ctx, 659.25, now + 0.12, 0.18, 0.35);
 }
 
@@ -59,7 +56,6 @@ function playTone(
   oscillator.type = "sine";
   oscillator.frequency.setValueAtTime(frequency, startTime);
 
-  // 부드러운 시작과 끝
   gainNode.gain.setValueAtTime(0, startTime);
   gainNode.gain.linearRampToValueAtTime(volume, startTime + 0.02);
   gainNode.gain.exponentialRampToValueAtTime(0.001, startTime + duration);

@@ -25,6 +25,11 @@
   --border: #e4e4e7;
   --border-hover: #d4d4d8;
 
+  --spectator: #71717a;
+  --spectator-soft: rgba(113, 113, 122, 0.06);
+  --spectator-border: rgba(113, 113, 122, 0.2);
+  --spectator-glow: rgba(113, 113, 122, 0.12);
+
   --radius: 12px;
   --radius-lg: 20px;
   --radius-full: 9999px;

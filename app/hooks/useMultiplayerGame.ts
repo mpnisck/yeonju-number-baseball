@@ -17,6 +17,7 @@ export interface GameRoom {
   revealed_answer: number[] | null;
   player1_secret: number[] | null;
   player2_secret: number[] | null;
+  isSpectator?: boolean;
 }
 
 interface PlayerInfo {
@@ -45,40 +46,47 @@ export function useMultiplayerGame(roomCode: string) {
   const [playerToken, setPlayerToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isSpectator, setIsSpectator] = useState(false);
+  const [spectatorCount, setSpectatorCount] = useState(0);
   const channelRef = useRef<ReturnType<
     ReturnType<typeof getSupabase>["channel"]
   > | null>(null);
 
-  // ref로 토큰을 유지해서 콜백/타이머 내에서 항상 최신값 참조
   const playerTokenRef = useRef<string | null>(null);
+  const isSpectatorRef = useRef(false);
 
   useEffect(() => {
     playerTokenRef.current = playerToken;
   }, [playerToken]);
 
-  // API에서 최신 방 상태를 가져오는 함수
+  useEffect(() => {
+    isSpectatorRef.current = isSpectator;
+  }, [isSpectator]);
+
   const refreshRoom = useCallback(async () => {
     const token = playerTokenRef.current;
-    if (!token) return;
+    const spectator = isSpectatorRef.current;
+
+    if (!spectator && !token) return;
 
     try {
-      const res = await fetch(`/api/rooms/${roomCode}?token=${token}`);
+      const url = spectator
+        ? `/api/rooms/${roomCode}?spectator=true`
+        : `/api/rooms/${roomCode}?token=${token}`;
+
+      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         setRoom(data);
       }
-    } catch {
-      // 네트워크 에러 무시 — 다음 폴링/이벤트에서 재시도
-    }
+    } catch {}
   }, [roomCode]);
 
-  // 초기 로드: 토큰 확인 + 방 상태 가져오기
   useEffect(() => {
     const init = async () => {
       const stored = getStoredPlayer(roomCode);
 
       if (stored) {
-        // 기존 플레이어: 방 상태 가져오기
         setPlayerToken(stored.token);
         setPlayerNumber(stored.playerNumber);
         playerTokenRef.current = stored.token;
@@ -88,11 +96,9 @@ export function useMultiplayerGame(roomCode: string) {
           const data = await res.json();
           setRoom(data);
         } else {
-          // 토큰이 유효하지 않으면 참가 시도
           await tryJoin();
         }
       } else {
-        // 새 플레이어: 참가 시도
         await tryJoin();
       }
 
@@ -115,7 +121,6 @@ export function useMultiplayerGame(roomCode: string) {
         setPlayerNumber(data.playerNumber);
         playerTokenRef.current = data.playerToken;
 
-        // 방 상태 다시 가져오기
         const roomRes = await fetch(
           `/api/rooms/${roomCode}?token=${data.playerToken}`
         );
@@ -123,11 +128,22 @@ export function useMultiplayerGame(roomCode: string) {
           setRoom(await roomRes.json());
         }
       } else {
-        try {
-          const errData = await res.json();
-          setError(errData.error || "방 참가에 실패했습니다.");
-        } catch {
-          setError("서버 오류가 발생했습니다.");
+        setIsSpectator(true);
+        isSpectatorRef.current = true;
+
+        const spectatorRes = await fetch(
+          `/api/rooms/${roomCode}?spectator=true`
+        );
+        if (spectatorRes.ok) {
+          const data = await spectatorRes.json();
+          setRoom(data);
+        } else {
+          try {
+            const errData = await spectatorRes.json();
+            setError(errData.error || "방을 찾을 수 없습니다.");
+          } catch {
+            setError("서버 오류가 발생했습니다.");
+          }
         }
       }
     };
@@ -135,19 +151,18 @@ export function useMultiplayerGame(roomCode: string) {
     init();
   }, [roomCode]);
 
-  // Realtime 구독: DB 변경 감지 시 API에서 최신 상태를 가져옴
   useEffect(() => {
     let client: ReturnType<typeof getSupabase> | null = null;
     try {
       client = getSupabase();
     } catch {
-      // Supabase 클라이언트 초기화 실패 시 Realtime 구독 생략
-      // → 폴링 fallback이 상태 동기화를 담당
       return;
     }
 
     const channel = client
-      .channel(`room-${roomCode}`)
+      .channel(`room-${roomCode}`, {
+        config: { presence: { key: "" } },
+      })
       .on(
         "postgres_changes",
         {
@@ -157,12 +172,19 @@ export function useMultiplayerGame(roomCode: string) {
           filter: `room_code=eq.${roomCode}`,
         },
         () => {
-          // payload.new를 직접 사용하지 않음
-          // → JSONB 컬럼(history 등)이 누락/불완전할 수 있으므로 API 재조회
           refreshRoom();
         }
       )
-      .subscribe();
+      .on("presence", { event: "sync" }, () => {
+        const state = channel.presenceState();
+        const count = Object.values(state).flat().length;
+        setSpectatorCount(count);
+      })
+      .subscribe(async (status) => {
+        if (status === "SUBSCRIBED" && isSpectatorRef.current) {
+          await channel.track({ type: "spectator" });
+        }
+      });
 
     channelRef.current = channel;
 
@@ -171,12 +193,15 @@ export function useMultiplayerGame(roomCode: string) {
     };
   }, [roomCode, refreshRoom]);
 
-  // 폴링 fallback: Realtime이 실패하더라도 주기적으로 상태 동기화
   useEffect(() => {
-    if (!playerToken) return;
-    if (!room) return;
+    if (isSpectator && channelRef.current) {
+      channelRef.current.track({ type: "spectator" });
+    }
+  }, [isSpectator]);
 
-    // 게임 종료 시 폴링 불필요
+  useEffect(() => {
+    if (!playerToken && !isSpectator) return;
+    if (!room) return;
     if (room.status === "finished") return;
 
     const interval = setInterval(() => {
@@ -184,9 +209,8 @@ export function useMultiplayerGame(roomCode: string) {
     }, 3000);
 
     return () => clearInterval(interval);
-  }, [playerToken, room?.status, refreshRoom]);
+  }, [playerToken, isSpectator, room?.status, refreshRoom]);
 
-  // 비밀 숫자 제출
   const submitSecret = useCallback(
     async (secret: number[]) => {
       if (!playerToken) return { success: false, error: "토큰이 없습니다." };
@@ -198,7 +222,6 @@ export function useMultiplayerGame(roomCode: string) {
       });
 
       if (res.ok) {
-        // 제출 후 즉시 최신 상태 반영
         await refreshRoom();
         return { success: true, error: null };
       } else {
@@ -209,7 +232,6 @@ export function useMultiplayerGame(roomCode: string) {
     [playerToken, roomCode, refreshRoom]
   );
 
-  // 추측 제출
   const submitGuess = useCallback(
     async (guess: number[]) => {
       if (!playerToken) return { success: false, error: "토큰이 없습니다." };
@@ -222,7 +244,6 @@ export function useMultiplayerGame(roomCode: string) {
 
       const data = await res.json();
       if (res.ok) {
-        // 제출 후 즉시 최신 상태 반영
         await refreshRoom();
         return { success: true, error: null, ...data };
       } else {
@@ -232,7 +253,6 @@ export function useMultiplayerGame(roomCode: string) {
     [playerToken, roomCode, refreshRoom]
   );
 
-  // 파생 상태
   const isMyTurn = room?.current_turn === playerNumber;
   const myHistory =
     playerNumber === 1 ? room?.player1_history : room?.player2_history;
@@ -253,6 +273,8 @@ export function useMultiplayerGame(roomCode: string) {
     playerNumber,
     isLoading,
     error,
+    isSpectator,
+    spectatorCount,
     submitSecret,
     submitGuess,
     isMyTurn,

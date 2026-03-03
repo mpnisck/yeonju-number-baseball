@@ -9,6 +9,7 @@ interface VictoryOverlayProps {
   answer: number[];
   mySecret?: number[] | null;
   opponentSecret?: number[] | null;
+  secretLabels?: { my: string; opponent: string };
   onPlayAgain: () => void;
   onHome: () => void;
 }
@@ -28,6 +29,7 @@ export default function VictoryOverlay({
   answer,
   mySecret,
   opponentSecret,
+  secretLabels,
   onPlayAgain,
   onHome,
 }: VictoryOverlayProps) {
@@ -53,7 +55,6 @@ export default function VictoryOverlay({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      {/* Confetti */}
       {confetti.map((c) => (
         <div
           key={c.id}
@@ -70,7 +71,6 @@ export default function VictoryOverlay({
       ))}
 
       <div className="flex flex-col items-center gap-8 bg-white rounded-3xl p-8 sm:p-10 mx-6 max-w-sm w-full animate-bounce-in border border-[var(--border)] shadow-xl">
-        {/* Trophy icon */}
         <div className="w-20 h-20 rounded-2xl bg-[var(--strike)]/10 flex items-center justify-center text-[var(--strike)] animate-float">
           <IconTrophy size={36} />
         </div>
@@ -87,12 +87,11 @@ export default function VictoryOverlay({
           </p>
         </div>
 
-        {/* Answer digits */}
         {isMulti ? (
           <div className="flex flex-col gap-4 w-full">
             {mySecret && (
               <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--bg-input)] border border-[var(--border)]">
-                <span className="text-xs font-semibold text-[var(--text-muted)]">내 숫자</span>
+                <span className="text-xs font-semibold text-[var(--text-muted)]">{secretLabels?.my ?? "내 숫자"}</span>
                 <div className="flex gap-2">
                   {mySecret.map((digit, i) => (
                     <span
@@ -108,7 +107,7 @@ export default function VictoryOverlay({
             )}
             {opponentSecret && (
               <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--bg-input)] border border-[var(--border)]">
-                <span className="text-xs font-semibold text-[var(--text-muted)]">상대 숫자</span>
+                <span className="text-xs font-semibold text-[var(--text-muted)]">{secretLabels?.opponent ?? "상대 숫자"}</span>
                 <div className="flex gap-2">
                   {opponentSecret.map((digit, i) => (
                     <span
@@ -137,7 +136,6 @@ export default function VictoryOverlay({
           </div>
         )}
 
-        {/* Actions */}
         <div className="flex gap-3 w-full mt-1">
           <button
             onClick={onHome}

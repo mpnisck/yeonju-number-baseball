@@ -8,6 +8,7 @@ interface GameHeaderProps {
   subtitle?: string;
   onReset?: () => void;
   children?: React.ReactNode;
+  rightContent?: React.ReactNode;
 }
 
 export default function GameHeader({
@@ -15,6 +16,7 @@ export default function GameHeader({
   subtitle,
   onReset,
   children,
+  rightContent,
 }: GameHeaderProps) {
   return (
     <header className="flex flex-wrap items-center justify-between gap-3 w-full mb-6">
@@ -36,8 +38,9 @@ export default function GameHeader({
           )}
         </div>
       </div>
+      {rightContent}
       {(children || onReset) && (
-        <div className="flex items-center justify-between gap-3 w-full">
+        <div className={`flex items-center gap-3 w-full ${onReset ? "justify-between" : "justify-center"}`}>
           {children}
           {onReset && (
             <button
