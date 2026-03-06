@@ -12,13 +12,7 @@ export function IconBaseball({ size = 24, className }: IconProps) {
       fill="none"
       className={className}
     >
-      <circle
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
       <path
         d="M6.5 3.5C8 6.5 8 10 6 14c-1 2-2.5 3.5-3.5 4.5"
         stroke="currentColor"
@@ -387,13 +381,7 @@ export function PlayerIcon({
       fill="none"
       className={className}
     >
-      <circle
-        cx="12"
-        cy="12"
-        r="10"
-        stroke="currentColor"
-        strokeWidth="1.5"
-      />
+      <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="1.5" />
       <text
         x="12"
         y="16.5"
