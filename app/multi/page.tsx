@@ -26,7 +26,7 @@ export default function MultiLobbyPage() {
           JSON.stringify({
             token: data.playerToken,
             playerNumber: data.playerNumber,
-          }),
+          })
         );
         router.push(`/multi/${data.roomCode}`);
       } else {
@@ -57,10 +57,7 @@ export default function MultiLobbyPage() {
   return (
     <main className="min-h-dvh flex flex-col items-center justify-center px-6 py-10 sm:py-16">
       <div className="w-full max-w-sm flex flex-col gap-10 animate-fade-in">
-        <GameHeader
-          title="온라인 대전"
-          subtitle="친구와 링크로 대결하세요"
-        />
+        <GameHeader title="온라인 대전" subtitle="친구와 링크로 대결하세요" />
 
         {/* Create room */}
         <button
@@ -105,11 +102,11 @@ export default function MultiLobbyPage() {
             <input
               type="text"
               value={roomCodeInput}
-              onChange={(e) => {
+              onChange={e => {
                 setRoomCodeInput(e.target.value.toUpperCase());
                 setError(null);
               }}
-              onKeyDown={(e) => e.key === "Enter" && handleJoin()}
+              onKeyDown={e => e.key === "Enter" && handleJoin()}
               placeholder="방 코드 입력"
               maxLength={6}
               className="flex-1 px-4 py-3.5 rounded-xl bg-[var(--bg-input)] border border-[var(--border)] text-[var(--text-primary)] placeholder:text-[var(--text-muted)] text-sm font-mono tracking-widest focus:outline-none focus:border-[var(--border-hover)] transition-colors"

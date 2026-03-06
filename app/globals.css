@@ -36,8 +36,9 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-pretendard), -apple-system, BlinkMacSystemFont,
-    system-ui, sans-serif;
+  --font-sans:
+    var(--font-pretendard), -apple-system, BlinkMacSystemFont, system-ui,
+    sans-serif;
 }
 
 @layer base {
@@ -54,8 +55,12 @@ body {
   height: 100%;
   overflow-x: hidden;
   overflow-y: auto;
-  font-family: var(--font-pretendard), -apple-system, BlinkMacSystemFont,
-    system-ui, sans-serif;
+  font-family:
+    var(--font-pretendard),
+    -apple-system,
+    BlinkMacSystemFont,
+    system-ui,
+    sans-serif;
   font-size: 16px;
   color: var(--text-primary);
   background: var(--bg-primary);

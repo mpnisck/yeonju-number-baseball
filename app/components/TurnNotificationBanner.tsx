@@ -29,10 +29,9 @@ export default function TurnNotificationBanner({
 
   return (
     <div
-      className={`fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none transition-all duration-500 ease-out ${visible
-          ? "translate-y-0 opacity-100"
-          : "-translate-y-full opacity-0"
-        }`}
+      className={`fixed top-0 left-0 right-0 z-50 flex justify-center pointer-events-none transition-all duration-500 ease-out ${
+        visible ? "translate-y-0 opacity-100" : "-translate-y-full opacity-0"
+      }`}
     >
       <div className="mt-4 flex items-center gap-2.5 px-5 py-3 rounded-xl border border-[var(--strike)]/25 bg-[var(--bg-card)] shadow-lg shadow-black/5 pointer-events-auto">
         <span className="relative flex h-2.5 w-2.5 shrink-0">

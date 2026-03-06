@@ -32,15 +32,15 @@ export default function GameHeader({
             {title}
           </h1>
           {subtitle && (
-            <p className="text-xs text-[var(--text-muted)] mt-1">
-              {subtitle}
-            </p>
+            <p className="text-xs text-[var(--text-muted)] mt-1">{subtitle}</p>
           )}
         </div>
       </div>
       {rightContent}
       {(children || onReset) && (
-        <div className={`flex items-center gap-3 w-full ${onReset ? "justify-between" : "justify-center"}`}>
+        <div
+          className={`flex items-center gap-3 w-full ${onReset ? "justify-between" : "justify-center"}`}
+        >
           {children}
           {onReset && (
             <button

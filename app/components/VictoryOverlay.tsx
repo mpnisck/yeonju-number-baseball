@@ -55,7 +55,7 @@ export default function VictoryOverlay({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      {confetti.map((c) => (
+      {confetti.map(c => (
         <div
           key={c.id}
           className="fixed rounded-full pointer-events-none"
@@ -91,7 +91,9 @@ export default function VictoryOverlay({
           <div className="flex flex-col gap-4 w-full">
             {mySecret && (
               <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--bg-input)] border border-[var(--border)]">
-                <span className="text-xs font-semibold text-[var(--text-muted)]">{secretLabels?.my ?? "내 숫자"}</span>
+                <span className="text-xs font-semibold text-[var(--text-muted)]">
+                  {secretLabels?.my ?? "내 숫자"}
+                </span>
                 <div className="flex gap-2">
                   {mySecret.map((digit, i) => (
                     <span
@@ -107,7 +109,9 @@ export default function VictoryOverlay({
             )}
             {opponentSecret && (
               <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--bg-input)] border border-[var(--border)]">
-                <span className="text-xs font-semibold text-[var(--text-muted)]">{secretLabels?.opponent ?? "상대 숫자"}</span>
+                <span className="text-xs font-semibold text-[var(--text-muted)]">
+                  {secretLabels?.opponent ?? "상대 숫자"}
+                </span>
                 <div className="flex gap-2">
                   {opponentSecret.map((digit, i) => (
                     <span

@@ -15,7 +15,7 @@ export function generateRandomNumber(): number[] {
 
 export function checkGuess(
   secret: number[],
-  guess: number[],
+  guess: number[]
 ): { strikes: number; balls: number } {
   let strikes = 0;
   let balls = 0;
@@ -34,7 +34,7 @@ export function checkGuess(
 export function isValidGuess(digits: number[]): boolean {
   if (digits.length !== 4) return false;
   const unique = new Set(digits);
-  return unique.size === 4 && digits.every((d) => d >= 0 && d <= 9);
+  return unique.size === 4 && digits.every(d => d >= 0 && d <= 9);
 }
 
 export function formatResult(strikes: number, balls: number): string {

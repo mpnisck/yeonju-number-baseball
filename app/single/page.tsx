@@ -25,18 +25,18 @@ export default function SinglePlayerPage() {
   const handleSelect = useCallback(
     (digit: number) => {
       if (selected.length >= 4 || selected.includes(digit)) return;
-      setSelected((prev) => [...prev, digit]);
+      setSelected(prev => [...prev, digit]);
     },
-    [selected],
+    [selected]
   );
 
   const handleDelete = useCallback(() => {
-    setSelected((prev) => prev.slice(0, -1));
+    setSelected(prev => prev.slice(0, -1));
   }, []);
 
   const handleSubmit = useCallback(() => {
     if (!isValidGuess(selected)) {
-      setShakeKey((k) => k + 1);
+      setShakeKey(k => k + 1);
       return;
     }
 
@@ -47,7 +47,7 @@ export default function SinglePlayerPage() {
       balls: result.balls,
     };
 
-    setHistory((prev) => [...prev, guessResult]);
+    setHistory(prev => [...prev, guessResult]);
     setSelected([]);
 
     if (result.strikes === 4) {
@@ -60,7 +60,7 @@ export default function SinglePlayerPage() {
     setSelected([]);
     setHistory([]);
     setIsWon(false);
-    setResetKey((k) => k + 1);
+    setResetKey(k => k + 1);
   }, []);
 
   return (
@@ -83,10 +83,11 @@ export default function SinglePlayerPage() {
             <div className="flex items-center gap-1.5">
               <span className="text-[11px] text-[var(--text-muted)]">상태</span>
               <span
-                className={`text-xs font-semibold ${isWon
-                  ? "text-[var(--success)]"
-                  : "text-[var(--text-secondary)]"
-                  }`}
+                className={`text-xs font-semibold ${
+                  isWon
+                    ? "text-[var(--success)]"
+                    : "text-[var(--text-secondary)]"
+                }`}
               >
                 {isWon
                   ? "정답!"
@@ -102,7 +103,16 @@ export default function SinglePlayerPage() {
         <div className="mt-6 flex flex-col md:flex-row gap-6 md:items-stretch">
           {/* Left: Number Pad */}
           <div className="w-full md:w-[360px] md:shrink-0">
-            <div key={`${resetKey}-${shakeKey}`} className={shakeKey > 0 ? "animate-shake" : resetKey > 0 ? "animate-fade-in-scale" : ""}>
+            <div
+              key={`${resetKey}-${shakeKey}`}
+              className={
+                shakeKey > 0
+                  ? "animate-shake"
+                  : resetKey > 0
+                    ? "animate-fade-in-scale"
+                    : ""
+              }
+            >
               <NumberPad
                 selected={selected}
                 onSelect={handleSelect}
