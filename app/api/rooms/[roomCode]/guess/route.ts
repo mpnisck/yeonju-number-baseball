@@ -1,73 +1,57 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/app/lib/supabase-server";
+import {
+  withSupabase,
+  fetchRoom,
+  resolvePlayerNumber,
+} from "@/app/lib/api-utils";
 import { checkGuess, isValidGuess, GuessResult } from "@/app/lib/game";
 
 export async function POST(
-  request: NextRequest,
-  { params }: { params: Promise<{ roomCode: string }> },
+  request: Request,
+  { params }: { params: Promise<{ roomCode: string }> }
 ) {
-  let supabase;
-  try {
-    supabase = getSupabaseAdmin();
-  } catch {
-    return NextResponse.json(
-      { error: "서버 설정 오류가 발생했습니다." },
-      { status: 500 },
-    );
-  }
+  const init = withSupabase();
+  if (init.error) return init.error;
+  const { supabase } = init;
+
   const { roomCode } = await params;
   const { playerToken, guess } = await request.json();
 
   if (!playerToken || !guess) {
-    return NextResponse.json(
+    return Response.json(
       { error: "토큰과 추측 숫자가 필요합니다." },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
   if (!isValidGuess(guess)) {
-    return NextResponse.json(
+    return Response.json(
       { error: "유효하지 않은 숫자입니다." },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
-  const { data: room, error: fetchError } = await supabase
-    .from("game_rooms")
-    .select("*")
-    .eq("room_code", roomCode)
-    .single();
-
-  if (fetchError || !room) {
-    return NextResponse.json(
-      { error: "방을 찾을 수 없습니다." },
-      { status: 404 },
-    );
-  }
+  const roomResult = await fetchRoom(supabase, roomCode);
+  if (roomResult.error) return roomResult.error;
+  const { room } = roomResult;
 
   if (room.status !== "playing") {
-    return NextResponse.json(
+    return Response.json(
       { error: "게임이 진행 중이 아닙니다." },
-      { status: 400 },
+      { status: 400 }
     );
   }
 
-  let playerNumber: number | null = null;
-  if (room.player1_token === playerToken) playerNumber = 1;
-  else if (room.player2_token === playerToken) playerNumber = 2;
+  const playerNumber = resolvePlayerNumber(room, playerToken);
 
   if (!playerNumber) {
-    return NextResponse.json(
+    return Response.json(
       { error: "유효하지 않은 토큰입니다." },
-      { status: 403 },
+      { status: 403 }
     );
   }
 
   if (room.current_turn !== playerNumber) {
-    return NextResponse.json(
-      { error: "당신의 차례가 아닙니다." },
-      { status: 400 },
-    );
+    return Response.json({ error: "당신의 차례가 아닙니다." }, { status: 400 });
   }
 
   const opponentNumber = playerNumber === 1 ? 2 : 1;
@@ -79,9 +63,9 @@ export async function POST(
     .single();
 
   if (secretError || !secretData) {
-    return NextResponse.json(
+    return Response.json(
       { error: "상대방의 숫자를 찾을 수 없습니다." },
-      { status: 500 },
+      { status: 500 }
     );
   }
 
@@ -117,13 +101,13 @@ export async function POST(
     .eq("id", room.id);
 
   if (updateError) {
-    return NextResponse.json(
+    return Response.json(
       { error: "결과 저장에 실패했습니다." },
-      { status: 500 },
+      { status: 500 }
     );
   }
 
-  return NextResponse.json({
+  return Response.json({
     strikes: result.strikes,
     balls: result.balls,
   });

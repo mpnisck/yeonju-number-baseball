@@ -40,6 +40,19 @@ function storePlayer(roomCode: string, info: PlayerInfo) {
   localStorage.setItem(`numbaseball_${roomCode}`, JSON.stringify(info));
 }
 
+function authHeaders(token: string): HeadersInit {
+  return {
+    "Content-Type": "application/json",
+    Authorization: `Bearer ${token}`,
+  };
+}
+
+function fetchRoom(roomCode: string, token: string) {
+  return fetch(`/api/rooms/${roomCode}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+}
+
 export function useMultiplayerGame(roomCode: string) {
   const [room, setRoom] = useState<GameRoom | null>(null);
   const [playerNumber, setPlayerNumber] = useState<1 | 2 | null>(null);
@@ -47,7 +60,6 @@ export function useMultiplayerGame(roomCode: string) {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [isSpectator, setIsSpectator] = useState(false);
-  const [spectatorCount, setSpectatorCount] = useState(0);
   const channelRef = useRef<ReturnType<
     ReturnType<typeof getSupabase>["channel"]
   > | null>(null);
@@ -70,11 +82,10 @@ export function useMultiplayerGame(roomCode: string) {
     if (!spectator && !token) return;
 
     try {
-      const url = spectator
-        ? `/api/rooms/${roomCode}?spectator=true`
-        : `/api/rooms/${roomCode}?token=${token}`;
+      const res = spectator
+        ? await fetch(`/api/rooms/${roomCode}?spectator=true`)
+        : await fetchRoom(roomCode, token!);
 
-      const res = await fetch(url);
       if (res.ok) {
         const data = await res.json();
         setRoom(data);
@@ -91,7 +102,7 @@ export function useMultiplayerGame(roomCode: string) {
         setPlayerNumber(stored.playerNumber);
         playerTokenRef.current = stored.token;
 
-        const res = await fetch(`/api/rooms/${roomCode}?token=${stored.token}`);
+        const res = await fetchRoom(roomCode, stored.token);
         if (res.ok) {
           const data = await res.json();
           setRoom(data);
@@ -121,9 +132,7 @@ export function useMultiplayerGame(roomCode: string) {
         setPlayerNumber(data.playerNumber);
         playerTokenRef.current = data.playerToken;
 
-        const roomRes = await fetch(
-          `/api/rooms/${roomCode}?token=${data.playerToken}`
-        );
+        const roomRes = await fetchRoom(roomCode, data.playerToken);
         if (roomRes.ok) {
           setRoom(await roomRes.json());
         }
@@ -175,12 +184,7 @@ export function useMultiplayerGame(roomCode: string) {
           refreshRoom();
         }
       )
-      .on("presence", { event: "sync" }, () => {
-        const state = channel.presenceState();
-        const count = Object.values(state).flat().length;
-        setSpectatorCount(count);
-      })
-      .subscribe(async (status) => {
+      .subscribe(async status => {
         if (status === "SUBSCRIBED" && isSpectatorRef.current) {
           await channel.track({ type: "spectator" });
         }
@@ -206,7 +210,7 @@ export function useMultiplayerGame(roomCode: string) {
 
     const interval = setInterval(() => {
       refreshRoom();
-    }, 3000);
+    }, 5000);
 
     return () => clearInterval(interval);
   }, [playerToken, isSpectator, room?.status, refreshRoom]);
@@ -217,7 +221,7 @@ export function useMultiplayerGame(roomCode: string) {
 
       const res = await fetch(`/api/rooms/${roomCode}/secret`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(playerToken),
         body: JSON.stringify({ playerToken, secret }),
       });
 
@@ -238,7 +242,7 @@ export function useMultiplayerGame(roomCode: string) {
 
       const res = await fetch(`/api/rooms/${roomCode}/guess`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: authHeaders(playerToken),
         body: JSON.stringify({ playerToken, guess }),
       });
 
@@ -262,7 +266,6 @@ export function useMultiplayerGame(roomCode: string) {
     playerNumber === 1 ? room?.player1_ready : room?.player2_ready;
   const opponentReady =
     playerNumber === 1 ? room?.player2_ready : room?.player1_ready;
-  const isWinner = room?.winner === playerNumber;
   const mySecret =
     playerNumber === 1 ? room?.player1_secret : room?.player2_secret;
   const opponentSecret =
@@ -274,7 +277,6 @@ export function useMultiplayerGame(roomCode: string) {
     isLoading,
     error,
     isSpectator,
-    spectatorCount,
     submitSecret,
     submitGuess,
     isMyTurn,
@@ -282,7 +284,7 @@ export function useMultiplayerGame(roomCode: string) {
     opponentHistory: opponentHistory || [],
     myReady: myReady || false,
     opponentReady: opponentReady || false,
-    isWinner,
+    isWinner: room?.winner === playerNumber,
     mySecret: mySecret || null,
     opponentSecret: opponentSecret || null,
   };

@@ -1,17 +1,10 @@
-import { NextResponse } from "next/server";
-import { getSupabaseAdmin } from "@/app/lib/supabase-server";
+import { withSupabase } from "@/app/lib/api-utils";
 import { generateRoomCode } from "@/app/lib/room-code";
 
 export async function POST() {
-  let supabase;
-  try {
-    supabase = getSupabaseAdmin();
-  } catch {
-    return NextResponse.json(
-      { error: "서버 설정 오류가 발생했습니다." },
-      { status: 500 },
-    );
-  }
+  const init = withSupabase();
+  if (init.error) return init.error;
+  const { supabase } = init;
   const playerToken = crypto.randomUUID();
 
   let roomCode = generateRoomCode();
@@ -36,13 +29,10 @@ export async function POST() {
   });
 
   if (error) {
-    return NextResponse.json(
-      { error: "방 생성에 실패했습니다." },
-      { status: 500 },
-    );
+    return Response.json({ error: "방 생성에 실패했습니다." }, { status: 500 });
   }
 
-  return NextResponse.json({
+  return Response.json({
     roomCode,
     playerToken,
     playerNumber: 1,
